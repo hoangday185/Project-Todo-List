@@ -65,14 +65,38 @@ const TodoList = () => {
     setCurrentTodo(null)
   }
 
-  console.log(todos)
+  const deleteTodo = (id: string) => {
+    if (currentTodo) {
+      setCurrentTodo(null)
+    }
+    setTodos((prevTodos) => {
+      const findIndexTodo = prevTodos.findIndex((todo) => todo.id == id)
+      if (findIndexTodo > -1) {
+        const result = [...prevTodos]
+        result.splice(findIndexTodo, 1)
+        return result
+      }
+      return prevTodos
+    })
+  }
 
   return (
     <div className={styles.todoList}>
       <div className={styles.container}>
         <TaskInput addTodo={addTodo} currentTodo={currentTodo} editTodo={editTodo} finishEditTodo={finishEditTodo} />
-        <TaskList todos={notdoneTodos} handleDoneTodo={handleDoneTodo} startEditTodo={startEditTodo} />
-        <TaskList doneTaskList={true} todos={doneTodos} handleDoneTodo={handleDoneTodo} startEditTodo={startEditTodo} />
+        <TaskList
+          todos={notdoneTodos}
+          handleDoneTodo={handleDoneTodo}
+          startEditTodo={startEditTodo}
+          deleteTodo={deleteTodo}
+        />
+        <TaskList
+          doneTaskList={true}
+          todos={doneTodos}
+          handleDoneTodo={handleDoneTodo}
+          startEditTodo={startEditTodo}
+          deleteTodo={deleteTodo}
+        />
       </div>
     </div>
   )
