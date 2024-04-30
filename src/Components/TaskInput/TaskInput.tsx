@@ -1,6 +1,11 @@
+//1 khai báo thư viện của node module trước
+//2 State Component tiếp theo
+//3 Cuối cùng là css
+import { useState } from 'react'
+import PropTypes from 'prop-types'
 import { Todo } from '@/@types/todo.type'
 import styles from '@/Components/TaskInput/taskInput.module.scss'
-import { useState } from 'react'
+import { TodoTypes } from '@/PropTypes/todo.proptype'
 
 interface TaskInputProps {
   addTodo: (name: string) => void
@@ -53,3 +58,10 @@ const TaskInput = (props: TaskInputProps) => {
 }
 
 export default TaskInput
+
+TaskInput.propTypes = {
+  addTodo: PropTypes.func.isRequired,
+  editTodo: PropTypes.func.isRequired,
+  finishEditTodo: PropTypes.func.isRequired,
+  currentTodo: PropTypes.oneOfType([TodoTypes, PropTypes.oneOf([null])]) //đại diện cho null
+}

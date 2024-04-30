@@ -1,5 +1,7 @@
+import PropTypes from 'prop-types'
 import { Todo } from '@/@types/todo.type'
 import styles from '@/Components/TaskList/taskList.module.scss'
+import { TodoTypes } from '@/PropTypes/todo.proptype'
 
 interface TaskListProps {
   doneTaskList?: boolean
@@ -45,3 +47,11 @@ const TaskList = (props: TaskListProps) => {
 }
 
 export default TaskList
+
+TaskList.propTypes = {
+  doneTaskList: PropTypes.bool,
+  todos: PropTypes.arrayOf(TodoTypes),
+  handleDoneTodo: PropTypes.func.isRequired,
+  startEditTodo: PropTypes.func.isRequired,
+  deleteTodo: PropTypes.func.isRequired
+}
