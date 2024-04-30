@@ -2,7 +2,24 @@ import { Todo } from '@/@types/todo.type'
 import TaskInput from '@/Components/TaskInput'
 import TaskList from '@/Components/TaskList'
 import styles from '@/Components/TodoList/todoList.module.scss'
-import { useEffect, useState } from 'react'
+import {
+  handleCancelEditCurrentTodoAction,
+  handleEditCurrentTodoAction,
+  handleStartEditCurrentTodoAction,
+  initalCurrrentValue,
+  reducerCurrentTodo
+} from '@/reducer/reducerCurrentTodo/reducer.currentTodo'
+import {
+  handleDeleteTodoAction,
+  handleDoneTodoAction,
+  handleGetDataAction,
+  handleUpdateEditTodoAction,
+  hanldeAddTodoAction,
+  initTodoList,
+  reducerTodoList
+} from '@/reducer/reducerTodoList/reducer.todoList'
+import { todo } from 'node:test'
+import { useEffect, useReducer, useState } from 'react'
 
 interface HandleNewTodo {
   (Todos: Todo[]): Todo[]
@@ -16,15 +33,20 @@ const syncReactToLocal = (handleNewTodo: HandleNewTodo) => {
 }
 
 const TodoList = () => {
-  const [todos, setTodos] = useState<Todo[]>([])
-  const [currentTodo, setCurrentTodo] = useState<Todo | null>(null)
-  const doneTodos = todos.filter((todo) => todo.done)
-  const notdoneTodos = todos.filter((todo) => !todo.done)
+  // const [todos, setTodos] = useState<Todo[]>([])
+  const [todoList, dispatchTodoList] = useReducer(reducerTodoList, initTodoList)
+  // const [currentTodo, setCurrentTodo] = useState<Todo | null>(null)
+  const [currentTodo, dispatchCurrentTodo] = useReducer(reducerCurrentTodo, initalCurrrentValue)
+  // const doneTodos = todos.filter((todo) => todo.done)
+  // const notdoneTodos = todos.filter((todo) => !todo.done)
+
+  const doneTodos = todoList.filter((todo: Todo) => todo.done)
+  const notdoneTodos = todoList.filter((todo: Todo) => !todo.done)
 
   useEffect(() => {
     const todosString = localStorage.getItem('todos')
     const todosObj: Todo[] = JSON.parse(todosString || '[]')
-    setTodos(todosObj)
+    dispatchTodoList(handleGetDataAction(todosObj))
   }, [])
 
   const addTodo = (name: string) => {
@@ -35,7 +57,7 @@ const TodoList = () => {
       done: false,
       id: new Date().toISOString()
     }
-    setTodos((prev) => [...prev, todo])
+    dispatchTodoList(hanldeAddTodoAction(todo))
     // chạy bất đồng bồ khi chạy xong hàm này thì vẫn todos mới vẫn chưa set xong :)
     syncReactToLocal((todosObj: Todo[]) => [...todosObj, todo])
   }
@@ -43,32 +65,35 @@ const TodoList = () => {
   const startEditTodo = (id: string) => {
     //do list todo ở đây nên ta phải làm hàm startEditTodo trên này và truyền xuống taskList component
     //tìm todo bằng id
-    const findTodo = todos.find((todo) => todo.id == id)
+    const findTodo = todoList.find((todo: Todo) => todo.id == id)
     //set currentTodo
     if (findTodo) {
-      setCurrentTodo(findTodo)
+      // setCurrentTodo(findTodo)
+      dispatchCurrentTodo(handleStartEditCurrentTodoAction(findTodo))
     }
   }
 
   const editTodo = (name: string) => {
     //khi edit 1 cái todo thì ta phải set lại list todo
     //nhưng tag input nên ở component input nên ta sẽ dùng viết hàm trên hàm và truyền xuống
-    setCurrentTodo((prevTodo) => {
-      if (prevTodo) return { ...prevTodo, name }
-      return null
-    })
+    // setCurrentTodo((prevTodo) => {
+    //   if (prevTodo) return { ...prevTodo, name }
+    //   return null
+    // })
+    dispatchCurrentTodo(handleEditCurrentTodoAction(name))
   }
 
   const handleDoneTodo = (id: string, done: boolean) => {
     //viết hàm xử lý checked ở đây để cho component con tái sử dụng
-    setTodos((prev) => {
-      return prev.map((todo) => {
-        if (todo.id == id) {
-          return { ...todo, done }
-        }
-        return todo
-      })
-    })
+    // setTodos((prev) => {
+    //   return prev.map((todo) => {
+    //     if (todo.id == id) {
+    //       return { ...todo, done }
+    //     }
+    //     return todo
+    //   })
+    // })
+    dispatchTodoList(handleDoneTodoAction(id, done))
   }
 
   const finishEditTodo = () => {
@@ -82,15 +107,17 @@ const TodoList = () => {
         return todo
       })
     }
-    setTodos(handler)
-    setCurrentTodo(null)
+    // setTodos(handler)
+    dispatchTodoList(handleUpdateEditTodoAction(currentTodo as Todo))
+    dispatchCurrentTodo(handleCancelEditCurrentTodoAction())
+    //setCurrentTodo(null)
     syncReactToLocal(handler)
   }
 
   const deleteTodo = (id: string) => {
-    if (currentTodo) {
-      setCurrentTodo(null)
-    }
+    // if (currentTodo) {
+    //   setCurrentTodo(null)
+    // }
     const handler = (todoObj: Todo[]) => {
       const findIndexTodo = todoObj.findIndex((todo) => todo.id == id)
       if (findIndexTodo > -1) {
@@ -100,7 +127,7 @@ const TodoList = () => {
       }
       return todoObj
     }
-    setTodos(handler)
+    dispatchTodoList(handleDeleteTodoAction(id))
     syncReactToLocal(handler)
   }
 

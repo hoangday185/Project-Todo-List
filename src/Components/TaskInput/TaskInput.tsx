@@ -24,7 +24,8 @@ const TaskInput = (props: TaskInputProps) => {
     event.preventDefault()
     if (currentTodo) {
       finishEditTodo()
-      if (name) setName('')
+      console.log(currentTodo)
+      if (!currentTodo) setName('')
     } else {
       addTodo(name)
       setName('')
